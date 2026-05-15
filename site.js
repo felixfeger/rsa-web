@@ -32,8 +32,8 @@ const pages = [
   {
     title: "Contact Us",
     url: "contact.html",
-    description: "Contact the Republic States Government and request an email OTP verification code.",
-    keywords: "contact resend otp email verification support"
+    description: "Contact the Republic States Government without an OTP code for general messages.",
+    keywords: "contact resend email support message"
   }
 ];
 
@@ -107,65 +107,32 @@ function setupSearch() {
   }
 }
 
-function setupContactOtp() {
+function setupContactForm() {
   const form = document.querySelector("[data-contact-form]");
   if (!form) return;
 
   const status = form.querySelector(".form-status");
-  const otpStep = form.querySelector("[data-otp-step]");
-  const requestButton = form.querySelector("[data-request-otp]");
   const submitButton = form.querySelector("[data-submit-contact]");
   const workerUrl = form.dataset.workerUrl || "";
-
-  requestButton?.addEventListener("click", async () => {
-    const email = form.email.value.trim();
-    if (!email) {
-      status.textContent = "Enter your email address first.";
-      return;
-    }
-    if (!workerUrl || workerUrl.includes("YOUR-WORKER")) {
-      status.textContent = "OTP backend is ready in cloudflare-worker.js. Add your deployed Worker URL to enable live email codes.";
-      otpStep.hidden = false;
-      return;
-    }
-
-    requestButton.disabled = true;
-    status.textContent = "Sending verification code...";
-    try {
-      const response = await fetch(`${workerUrl}/request-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      if (!response.ok) throw new Error("Could not send code.");
-      otpStep.hidden = false;
-      status.textContent = "Check your email for a six-digit code.";
-    } catch (error) {
-      status.textContent = error.message;
-    } finally {
-      requestButton.disabled = false;
-    }
-  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(form).entries());
-    if (!workerUrl || workerUrl.includes("YOUR-WORKER")) {
-      status.textContent = "Demo mode: your message is ready, but the Worker URL has not been deployed yet.";
+    if (!workerUrl) {
+      status.textContent = "Contact backend URL is missing.";
       return;
     }
 
     submitButton.disabled = true;
-    status.textContent = "Verifying code and sending message...";
+    status.textContent = "Sending message...";
     try {
       const response = await fetch(`${workerUrl}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error("Verification failed or message could not be sent.");
+      if (!response.ok) throw new Error("Message could not be sent.");
       form.reset();
-      otpStep.hidden = true;
       status.textContent = "Message sent. Thank you for contacting the Republic States Government.";
     } catch (error) {
       status.textContent = error.message;
@@ -209,5 +176,5 @@ function setupOfficialChecker() {
 
 setupBanner();
 setupSearch();
-setupContactOtp();
+setupContactForm();
 setupOfficialChecker();
