@@ -97,8 +97,9 @@ a:hover {
 .topbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-  min-height: 88px;
+  min-height: 76px;
 }
 
 .brand {
@@ -132,7 +133,6 @@ a:hover {
 .search-form {
   display: flex;
   gap: 0;
-  margin-left: auto;
   width: min(440px, 100%);
 }
 
@@ -198,9 +198,17 @@ a:hover {
   align-items: center;
 }
 
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  align-items: center;
+  gap: 1.25rem;
+  padding: 3.5rem 0;
+}
+
 .hero-inner {
   max-width: 650px;
-  padding: 3.5rem 1rem;
+  padding: 0 1rem 0 0;
 }
 
 .hero h1,
@@ -221,6 +229,32 @@ a:hover {
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+.hero-search-card {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  border-radius: 6px;
+  border-top: 0.45rem solid var(--gold);
+  padding: 1.15rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.hero-search-card h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.hero-search-card p {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.search-form-card,
+.search-form-page {
+  width: 100%;
 }
 
 .button.secondary {
@@ -351,6 +385,67 @@ textarea {
   color: var(--blue-darker);
 }
 
+.checker-panel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin: 0 0 1.5rem;
+  background: #fff;
+}
+
+.checker-panel h2 {
+  margin-top: 0;
+}
+
+.checker-form label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.checker-row {
+  display: flex;
+  gap: 0;
+  width: min(680px, 100%);
+}
+
+.checker-row input {
+  border-right: 0;
+}
+
+.checker-status {
+  min-height: 1.6rem;
+  font-weight: 700;
+  color: var(--blue-darker);
+}
+
+.checker-status.not-official {
+  color: var(--red);
+}
+
+.official-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.official-list article {
+  border: 1px solid var(--line);
+  border-left: 0.35rem solid var(--blue);
+  border-radius: 6px;
+  padding: 0.95rem;
+  background: #fff;
+}
+
+.official-list h3 {
+  margin: 0 0 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.official-list p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .footer {
   background: #1b1b1b;
   color: var(--white);
@@ -384,19 +479,69 @@ textarea {
   }
 
   .brand {
-    margin: 1rem 0;
+    min-width: 0;
+    margin: 0.85rem 0;
+  }
+
+  .brand img {
+    width: 50px;
+    height: 34px;
   }
 
   .search-form {
     margin: 0 0 1rem;
   }
 
+  .nav .wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+
+  .nav a {
+    padding: 0.8rem 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
   .grid.three,
-  .grid.two {
+  .grid.two,
+  .official-list {
     grid-template-columns: 1fr;
   }
 
   .hero {
-    min-height: 360px;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .hero-layout {
+    grid-template-columns: 1fr;
+    padding: 2rem 0;
+  }
+
+  .hero-inner {
+    padding: 0;
+  }
+
+  .hero h1,
+  .page-title h1 {
+    font-size: 2.35rem;
+    line-height: 1.05;
+  }
+
+  .hero-search-card {
+    margin-top: 0.25rem;
+  }
+
+  .search-form-card,
+  .search-form-page,
+  .checker-row {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .search-form input,
+  .checker-row input {
+    border-right: 1px solid #71767a;
   }
 }
