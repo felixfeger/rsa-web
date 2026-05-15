@@ -37,6 +37,20 @@ const pages = [
   }
 ];
 
+const officialWebsites = {
+  "citymetro.xyz": "City Metro Transit, State-Owned Public Transit Provider for Lego City County",
+  "dot.citymetro.xyz": "Republic States Railways, State Railway Agency/DOT",
+  "lccity.republicstates.xyz": "City of Lego City, Republic States",
+  "lccounty.republicstates.xyz": "County of Lego City, Republic States",
+  "lcpolice.wordpress.com": "Lego City Police Department, Lego City, Republic States",
+  "lcsdonline.wordpress.com": "Lego City Sheriff's Department, Lego City County, Republic States",
+  "republicstatesgov.xyz": "Republic States of America Official Website, RSA",
+  "rhp.republicstates.xyz": "Republic Highway Patrol, Federal Police, RSA",
+  "police.citymetro.xyz": "City Metro Transit Police",
+  "fire.republicstates.xyz": "Republic States Fire Dept and Lego City County Fire Dept.",
+  "airport.citymetro.xyz": "Felix Lego City International Airport"
+};
+
 function setupBanner() {
   const banner = document.querySelector(".official-banner");
   const button = document.querySelector(".banner-button");
@@ -161,6 +175,39 @@ function setupContactOtp() {
   });
 }
 
+function normalizeWebsite(value) {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return "";
+  try {
+    const withProtocol = trimmed.includes("://") ? trimmed : `https://${trimmed}`;
+    return new URL(withProtocol).hostname.replace(/^www\./, "");
+  } catch {
+    return trimmed.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+  }
+}
+
+function setupOfficialChecker() {
+  const form = document.querySelector("[data-official-checker]");
+  const status = document.querySelector("[data-checker-status]");
+  if (!form || !status) return;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const domain = normalizeWebsite(form.website.value || "");
+    const description = officialWebsites[domain];
+
+    status.classList.toggle("not-official", !description);
+    if (description) {
+      status.textContent = `${domain} is listed as official: ${description}. Always double check the address before sharing information.`;
+    } else if (domain) {
+      status.textContent = `${domain} is not on this official website list. Do not submit sensitive information unless you can verify it another way.`;
+    } else {
+      status.textContent = "Enter a website address to check.";
+    }
+  });
+}
+
 setupBanner();
 setupSearch();
 setupContactOtp();
+setupOfficialChecker();
