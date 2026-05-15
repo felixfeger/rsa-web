@@ -12,15 +12,13 @@ Static multi-page website for the fictional Republic States of America governmen
 - `contact.html`
 - `search.html`
 
-## Contact OTP backend
+## Contact backend
 
-`cloudflare-worker.js` contains a Cloudflare Worker that sends OTP codes and contact emails through Resend.
+`worker.js` contains a Cloudflare Worker that sends contact emails through Resend. It also keeps an OTP request endpoint for a future specific form; the contact page does not require OTP.
 
 Required Worker bindings and secrets:
 
 - `RESEND_API_KEY`
-- `MAIL_FROM`
-- `CONTACT_TO`
-- `OTP_CODES`, a Cloudflare KV namespace
+- `OTP_CODES`, a Cloudflare KV namespace, only needed when the future OTP form is used
 
-After deploying the Worker, replace `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev` in `contact.html` with the Worker URL.
+Name the Worker file `worker.js`. The contact page is configured to call `https://workername.felixfeger46.workers.dev`.
