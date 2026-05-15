@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" role="img" aria-labelledby="title desc">
+  <title id="title">Republic States flag</title>
+  <desc id="desc">A red, white, and blue striped flag inspired by the uploaded Republic States flag.</desc>
+  <rect width="90" height="60" fill="#fff"/>
+  <g fill="#b31942">
+    <rect y="0" width="90" height="4.62"/>
+    <rect y="9.23" width="90" height="4.62"/>
+    <rect y="18.46" width="90" height="4.62"/>
+    <rect y="27.69" width="90" height="4.62"/>
+    <rect y="36.92" width="90" height="4.62"/>
+    <rect y="46.15" width="90" height="4.62"/>
+    <rect y="55.38" width="90" height="4.62"/>
+  </g>
+  <rect width="36" height="27.69" fill="#102e5f"/>
+  <g fill="#fff">
+    <path d="M10.5 7.2l1 2.2 2.4.2-1.8 1.6.6 2.3-2.1-1.2-2.1 1.2.5-2.3-1.8-1.6 2.4-.2z"/>
+    <path d="M24.5 7.2l1 2.2 2.4.2-1.8 1.6.6 2.3-2.1-1.2-2.1 1.2.5-2.3-1.8-1.6 2.4-.2z"/>
+    <path d="M17.5 17.4l1 2.2 2.4.2-1.8 1.6.6 2.3-2.1-1.2-2.1 1.2.5-2.3-1.8-1.6 2.4-.2z"/>
+  </g>
+  <rect x="0" y="0" width="90" height="60" fill="none" stroke="#111827" stroke-width="1"/>
+</svg>
