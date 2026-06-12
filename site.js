@@ -3,6 +3,7 @@ const pages = [
   { title: "All Government Services", url: "services.html", description: "Find services for identity records, permits, benefits, taxes, public safety, and civic requests.", keywords: "services permits benefits taxes records public safety licenses applications" },
   { title: "Visiting the Republic States", url: "visiting.html", description: "Visitor information for travel, ports of entry, parks, roads, and public transportation.", keywords: "visiting travel tourism entry transportation parks california" },
   { title: "Customs and Immigration", url: "cbp.html", description: "Customs, border protection, declarations, port of entry, and immigration visitor guidance.", keywords: "cbp customs border immigration visitor entry declaration passport green card citizenship airport" },
+  { title: "Emergency Information", url: "emergency.html", description: "Current Republic States emergency alerts, statuses, affected areas, and public safety instructions.", keywords: "emergency emergencies alerts status public safety warning advisory evacuation" },
   { title: "About the Republic States", url: "about.html", description: "Learn about the Republic States, its capital, institutions, and public purpose.", keywords: "about republic states america rsa death star city government" },
   { title: "Official Websites", url: "official-websites.html", description: "Check official Republic States and City Metro domains.", keywords: "official websites republicstates.xyz citymetro.xyz security domains government" },
   { title: "Contact Us", url: "contact.html", description: "Contact the Republic States Government without an OTP code for general messages.", keywords: "contact resend email support message" },
@@ -162,4 +163,24 @@ function setupOfficialChecker() {
   });
 }
 
-setupBanner(); setupSearch(); setupContactForm(); setupApplicationForms(); setupOfficialChecker();
+function setupEmergencyPage() {
+  const list = document.querySelector("[data-emergency-list]");
+  const heading = document.querySelector("[data-emergency-heading]");
+  const message = document.querySelector("[data-emergency-message]");
+  const updated = document.querySelector("[data-emergency-updated]");
+  if (!list || !heading || !message) return;
+  const data = window.rsaEmergencyData || {};
+  const emergencies = Array.isArray(data.emergencies) ? data.emergencies : [];
+  if (updated) updated.textContent = data.lastUpdated ? `Last updated: ${data.lastUpdated}` : "";
+  if (data.noCurrentEmergencies || emergencies.length === 0) {
+    heading.textContent = "No current emergencies";
+    message.textContent = data.message || "There are no current Republic States emergency alerts.";
+    list.innerHTML = "";
+    return;
+  }
+  heading.textContent = `${emergencies.length} current ${emergencies.length === 1 ? "emergency" : "emergencies"}`;
+  message.textContent = data.message || "Review the active emergency information below.";
+  list.innerHTML = emergencies.map((item) => `<article class="emergency-card"><div class="emergency-card-header"><h2>${item.title || "Emergency alert"}</h2><span class="status-pill">${item.status || "Active"}</span></div><dl class="emergency-meta"><div><dt>Severity</dt><dd>${item.severity || "Not specified"}</dd></div><div><dt>Area</dt><dd>${item.area || "Republic States"}</dd></div><div><dt>Updated</dt><dd>${item.updated || data.lastUpdated || "Not specified"}</dd></div></dl><p>${item.summary || ""}</p><p><strong>Instructions:</strong> ${item.instructions || "Monitor official updates and follow public safety directions."}</p></article>`).join("");
+}
+
+setupBanner(); setupSearch(); setupContactForm(); setupApplicationForms(); setupOfficialChecker(); setupEmergencyPage();
