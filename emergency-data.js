@@ -1,5 +1,5 @@
 window.rsaEmergencyData = {
-  noCurrentEmergencies: true,
+  noCurrentEmergencies: false,
   lastUpdated: "2026-06-12 14:00 PT",
   message: "One emergency incident.",
   emergencies: [
