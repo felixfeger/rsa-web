@@ -10,6 +10,7 @@ Static multi-page website for the fictional Republic States of America governmen
 - `about.html`
 - `official-websites.html`
 - `cbp.html`
+- `emergency.html`
 - `contact.html`
 - `search.html`
 - `citizenship.html`
@@ -26,3 +27,10 @@ Required Worker bindings and secrets:
 - `OTP_CODES`, a Cloudflare KV namespace for application OTP verification
 
 Name the Worker file `worker.js`. The contact page and application pages are configured to call `https://workername.felixfeger46.workers.dev`.
+
+## Emergency page
+
+Edit `emergency-data.js` to update `emergency.html`.
+
+- Set `noCurrentEmergencies: true` to display "No current emergencies."
+- Set `noCurrentEmergencies: false` and edit the `emergencies` list to display active alerts.
