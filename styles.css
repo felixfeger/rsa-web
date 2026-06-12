@@ -61,13 +61,30 @@ a:hover { color: var(--blue-dark); }
 .card-body { padding: 1.1rem; }
 .card h2, .card h3 { margin: 0 0 0.45rem; line-height: 1.2; }
 .notice { border-left: 0.45rem solid var(--gold); background: #fff8e6; padding: 1rem 1.1rem; margin: 0 0 1.5rem; }
+.eyebrow { color: var(--blue-darker); font-size: 0.9rem; font-weight: 700; letter-spacing: 0; margin: 0 0 0.4rem; text-transform: uppercase; }
+.page-section { margin: 1.5rem 0; }
 .page-title { background: var(--base); border-bottom: 1px solid var(--line); padding: 2.5rem 0; }
 .page-title p { max-width: 70ch; color: var(--muted); font-size: 1.12rem; }
+.emergency-title { border-top: 0.5rem solid var(--red); }
+.emergency-summary { align-items: start; background: #fff; border: 1px solid var(--line); border-left: 0.5rem solid var(--red); display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1.5rem; padding: 1.25rem; }
+.emergency-summary h2 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.05; margin: 0 0 0.6rem; }
+.emergency-summary p { margin: 0; }
+.emergency-updated { color: var(--muted); font-weight: 700; white-space: nowrap; }
+.emergency-list { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+.emergency-card { border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 1.25rem; }
+.emergency-card-header { align-items: start; display: flex; gap: 1rem; justify-content: space-between; }
+.emergency-card h2 { margin: 0 0 0.75rem; }
+.status-pill { background: #fde0db; border: 1px solid #f8a99d; border-radius: 999px; color: #8b0a03; display: inline-flex; font-weight: 700; padding: 0.3rem 0.65rem; white-space: nowrap; }
+.emergency-meta { display: grid; gap: 0.75rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 1rem; }
+.emergency-meta div { border-top: 1px solid var(--line); padding-top: 0.6rem; }
+.emergency-meta dt { color: var(--muted); font-weight: 700; }
+.emergency-meta dd { margin: 0; }
 .service-list { display: grid; gap: 0.75rem; list-style: none; padding: 0; }
 .service-list li { border: 1px solid var(--line); border-left: 0.35rem solid var(--blue); padding: 1rem; background: #fff; }
 .results { margin-top: 1rem; display: grid; gap: 0.75rem; }
 .result-item { border: 1px solid var(--line); border-radius: 6px; padding: 1rem; }
 .form-panel { max-width: 720px; border: 1px solid var(--line); border-radius: 6px; padding: 1.25rem; background: var(--white); }
+.application-form { margin-top: 1.25rem; }
 .form-row { display: grid; gap: 0.35rem; margin-bottom: 1rem; }
 label { font-weight: 700; }
 input, textarea { border: 1px solid #71767a; padding: 0.75rem; font: inherit; width: 100%; }
@@ -96,7 +113,7 @@ textarea { min-height: 130px; resize: vertical; }
   .search-form { margin: 0 0 1rem; }
   .nav .wrap { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
   .nav a { padding: 0.8rem 0.9rem; border-top: 1px solid rgba(255, 255, 255, 0.12); }
-  .grid.three, .grid.two, .official-list { grid-template-columns: 1fr; }
+  .grid.three, .grid.two, .official-list, .emergency-meta { grid-template-columns: 1fr; }
   .hero { min-height: 0; align-items: stretch; }
   .hero-layout { grid-template-columns: 1fr; padding: 2rem 0; }
   .hero-inner { padding: 0; }
@@ -104,4 +121,6 @@ textarea { min-height: 130px; resize: vertical; }
   .hero-search-card { margin-top: 0.25rem; }
   .search-form-card, .search-form-page, .checker-row { display: grid; gap: 0.6rem; }
   .search-form input, .checker-row input { border-right: 1px solid #71767a; }
+  .emergency-summary, .emergency-card-header { display: block; }
+  .emergency-updated { margin-top: 1rem; white-space: normal; }
 }
