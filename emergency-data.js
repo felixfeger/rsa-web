@@ -1,7 +1,7 @@
 window.rsaEmergencyData = {
   noCurrentEmergencies: false,
   lastUpdated: "2026-06-14 5:39 PDT",
-  message: "One emergency incident.",
+  message: "This incident is no longer being managed at the federal level. Please contact the Heartlake City Rescue for more information.",
   emergencies: [
     {
       title: "Heartlake City Bridge Collaspe",
