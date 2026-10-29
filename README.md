@@ -27,7 +27,19 @@ Set the following Cloudflare Pages project secret:
 
 Optionally set `MAIL_FROM` to a sender address verified in Resend. If omitted, the functions use the configured default sender. Set variables/secrets for both Production and Preview if you use both.
 
-The application pages link to hosted Autentik sign-in at `https://login.republicstates.xyz`. The link does not establish an OIDC callback or gate form submissions; a full login session needs an Autentik OAuth2/OIDC application and client configuration.
+The application pages use an Autentik OIDC authorization-code flow with PKCE. Pages Functions validate the ID token signature, issuer, audience, nonce, and state, then issue a signed HTTP-only session cookie. Application submissions require a valid session and use the authenticated profile's name and email. Autentik login credentials are never handled by this site.
+
+Configure the following Cloudflare Pages project values for both Production and Preview (with matching redirect URIs):
+
+- `AUTHENTIK_ISSUER` (for example, `https://login.republicstates.xyz/application/o/rsa-web/`)
+- `AUTHENTIK_CLIENT_ID`
+- `AUTHENTIK_REDIRECT_URI` (for example, `https://YOUR-SITE-DOMAIN/auth/callback`)
+- `AUTHENTIK_CLIENT_SECRET` as an encrypted secret using the provider's `client_secret_basic` method
+- `SESSION_SECRET` as an encrypted, random secret of at least 32 bytes
+- `RESEND_API_KEY` as an encrypted secret
+- `MAIL_FROM` is optional; if set, it must be a sender verified in Resend
+
+In Authentik, enable Authorization Code, select an RSA signing key using RS256, allow the exact callback URL, and provide `openid`, `email`, and `profile` scope mappings. The site requires Authentik to return the user's name and email.
 
 ## Emergency page
 
