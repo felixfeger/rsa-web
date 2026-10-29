@@ -135,10 +135,13 @@ export async function discovery(env) {
   if (!metadata.issuer || metadata.issuer.replace(/\/+$/, "") !== issuer) {
     throw new Error("Autentik discovery issuer does not match AUTHENTIK_ISSUER.");
   }
-  for (const key of ["authorization_endpoint", "token_endpoint", "jwks_uri", "userinfo_endpoint"]) {
+  for (const key of ["authorization_endpoint", "token_endpoint", "jwks_uri"]) {
     if (!metadata[key] || new URL(metadata[key]).protocol !== "https:") {
       throw new Error("Autentik discovery document is missing a valid " + key + ".");
     }
+  }
+  if (metadata.userinfo_endpoint && new URL(metadata.userinfo_endpoint).protocol !== "https:") {
+    throw new Error("Autentik UserInfo endpoint must use HTTPS.");
   }
   return metadata;
 }
