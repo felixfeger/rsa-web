@@ -17,16 +17,17 @@ Static multi-page website for the fictional Republic States of America governmen
 - `greencard.html`
 - `passport.html`
 
-## Contact backend
+## Contact and application backend
 
-`worker.js` contains a Cloudflare Worker that sends contact emails and OTP-protected application forms through Resend. The contact page does not require OTP. Citizenship, green card, and passport applications do require OTP.
+`worker.js` sends contact messages and application survey responses through Resend to `hello@felixfeger.com`. Application forms collect a name, email address, and the listed survey answers only. The Worker accepts an allowlist of survey fields and does not keep an OTP store.
 
-Required Worker bindings and secrets:
+The application pages link to the hosted Autentik sign-in page at `https://login.republicstates.xyz`. This is a hosted sign-in link; a complete OIDC callback/session flow requires an Autentik OAuth2/OIDC application and its client ID and redirect URI.
+
+Required Worker secret:
 
 - `RESEND_API_KEY`
-- `OTP_CODES`, a Cloudflare KV namespace for application OTP verification
 
-Name the Worker file `worker.js`. The contact page and application pages are configured to call `https://workername.felixfeger46.workers.dev`.
+The contact page and application pages call `https://workername.felixfeger46.workers.dev`.
 
 ## Emergency page
 
