@@ -1,5 +1,9 @@
-const MAIL_FROM = "Republic States Government <noreply@republicstates.xyz>";
-const CONTACT_TO = "felix@citymetro.xyz";
+const CONTACT_TO = "hello@felixfeger.com";
+const APPLICATION_FIELDS = {
+  "Citizenship Application": ["citizenshipStatement", "additionalComments"],
+  "Green Card Application": ["residenceReason", "plans", "additionalComments"],
+  "Passport Application": ["travelReason", "additionalComments"]
+};
 
 export default {
   async fetch(request, env) {
@@ -11,13 +15,13 @@ export default {
 
     if (url.pathname === "/contact" && request.method === "POST") {
       const body = await request.json();
-      const name = clean(body.name);
-      const email = clean(body.email);
-      const topic = clean(body.topic);
-      const messageBody = clean(body.message);
+      const name = clean(body.name, 120);
+      const email = clean(body.email, 254);
+      const topic = clean(body.topic, 120);
+      const messageBody = clean(body.message, 4000);
 
-      if (!name || !email || !email.includes("@") || !topic || !messageBody) {
-        return cors(json({ error: "Name, email, topic, and message are required." }, 400));
+      if (!name || !validEmail(email) || !topic || !messageBody) {
+        return cors(json({ error: "Name, valid email, topic, and message are required." }, 400));
       }
 
       const message = [
@@ -44,19 +48,27 @@ export default {
 
     if (url.pathname === "/application" && request.method === "POST") {
       const body = await request.json();
-      const email = clean(body.email).toLowerCase();
-      const otp = clean(body.otp);
-      const expected = env.OTP_CODES ? await env.OTP_CODES.get(email) : null;
+      const applicationType = clean(body.applicationType, 80);
+      const allowedFields = APPLICATION_FIELDS[applicationType];
+      const name = clean(body.name, 120);
+      const email = clean(body.email, 254);
 
-      if (!expected || expected !== otp) {
-        return cors(json({ error: "Invalid or expired OTP code." }, 401));
+      if (!allowedFields || !name || !validEmail(email)) {
+        return cors(json({ error: "Application type, name, and valid email are required." }, 400));
       }
 
-      const applicationType = clean(body.applicationType) || "Application";
-      const lines = Object.entries(body)
-        .filter(([key]) => !["otp"].includes(key))
-        .map(([key, value]) => `${label(key)}: ${clean(value)}`);
+      const values = allowedFields
+        .map((field) => [field, clean(body[field], 2000)])
+        .filter(([, value]) => value);
+      if (values.length === 0) {
+        return cors(json({ error: "Please complete the application survey." }, 400));
+      }
 
+      const lines = [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        ...values.map(([field, value]) => `${label(field)}: ${value}`)
+      ];
       const resendResponse = await sendEmail(env, {
         to: CONTACT_TO,
         reply_to: email,
@@ -66,45 +78,6 @@ export default {
 
       if (!resendResponse.ok) {
         return cors(json({ error: "Unable to send application." }, 502));
-      }
-
-      await env.OTP_CODES.delete(email);
-      return cors(json({ ok: true }));
-    }
-
-    if (url.pathname === "/verify-otp" && request.method === "POST") {
-      const { email, otp } = await request.json();
-      const normalizedEmail = String(email || "").trim().toLowerCase();
-      const expected = env.OTP_CODES ? await env.OTP_CODES.get(normalizedEmail) : null;
-
-      if (!expected || expected !== String(otp || "").trim()) {
-        return cors(json({ error: "Invalid or expired OTP code." }, 401));
-      }
-
-      return cors(json({ ok: true }));
-    }
-
-    if (url.pathname === "/request-otp" && request.method === "POST") {
-      const { email } = await request.json();
-      if (!email || !String(email).includes("@")) {
-        return cors(json({ error: "A valid email is required." }, 400));
-      }
-      if (!env.OTP_CODES) {
-        return cors(json({ error: "OTP storage is not configured." }, 500));
-      }
-
-      const normalizedEmail = String(email).trim().toLowerCase();
-      const code = String(Math.floor(100000 + Math.random() * 900000));
-      await env.OTP_CODES.put(normalizedEmail, code, { expirationTtl: 600 });
-
-      const resendResponse = await sendEmail(env, {
-        to: normalizedEmail,
-        subject: "Your Republic States verification code",
-        text: `Your Republic States Government verification code is ${code}. It expires in 10 minutes.`
-      });
-
-      if (!resendResponse.ok) {
-        return cors(json({ error: "Unable to send OTP email." }, 502));
       }
 
       return cors(json({ ok: true }));
@@ -122,14 +95,18 @@ async function sendEmail(env, payload) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from: MAIL_FROM,
+      from: env.MAIL_FROM || "Republic States Project <noreply@republicstates.xyz>",
       ...payload
     })
   });
 }
 
-function clean(value) {
-  return String(value || "").trim();
+function clean(value, maxLength) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+function validEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function label(value) {
