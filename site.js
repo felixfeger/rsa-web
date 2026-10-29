@@ -232,22 +232,35 @@ function setupApplicationAuth() {
     if (!form || !status || !signIn) return;
 
     const returnTo = window.location.pathname;
+    const hasAuthError = new URLSearchParams(window.location.search).has("auth_error");
     signIn.href = "/auth/login?return_to=" + encodeURIComponent(returnTo);
+    signIn.hidden = true;
     form.hidden = true;
-    signOut.hidden = true;
+    if (signOut) signOut.hidden = true;
+    status.textContent = "Checking Autentik sign-in...";
 
     try {
       const response = await fetch("/auth/me", { credentials: "same-origin", cache: "no-store" });
+      if (response.status === 401 && !hasAuthError) {
+        const loginUrl = new URL("/auth/login", window.location.origin);
+        loginUrl.searchParams.set("prompt", "none");
+        loginUrl.searchParams.set("return_to", returnTo);
+        window.location.replace(loginUrl.toString());
+        return;
+      }
+
       if (!response.ok) {
-        status.textContent = new URLSearchParams(window.location.search).has("auth_error")
+        status.textContent = hasAuthError
           ? "Sign-in did not complete. Please try again."
-          : "Sign in with Autentik to complete this survey.";
+          : "Could not check your sign-in session. Please try again.";
+        signIn.hidden = false;
         return;
       }
 
       const result = await response.json();
       if (!result.authenticated || !result.user) {
         status.textContent = "Sign in with Autentik to complete this survey.";
+        signIn.hidden = false;
         return;
       }
 
@@ -262,15 +275,14 @@ function setupApplicationAuth() {
         emailInput.readOnly = true;
       }
       status.textContent = "Signed in as " + (result.user.name || result.user.email) + ".";
-      signIn.hidden = true;
-      signOut.hidden = false;
+      if (signOut) signOut.hidden = false;
       form.hidden = false;
     } catch {
       status.textContent = "Could not check your sign-in session. Reload the page and try again.";
+      signIn.hidden = false;
     }
   });
 }
-
 function setupApplicationForms() {
   document.querySelectorAll("[data-application-form]").forEach((form) => {
     const page = form.closest("[data-application-page]");
