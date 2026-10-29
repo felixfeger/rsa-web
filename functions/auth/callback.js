@@ -9,6 +9,7 @@ import {
   json,
   readCookie,
   redirect,
+  redirectUri,
   safeReturnTo,
   signPayload,
   verifyIdToken,
@@ -22,6 +23,13 @@ export async function onRequestGet({ request, env }) {
   if (error) return json({ error }, 500);
 
   const url = new URL(request.url);
+  let callbackUri;
+  try {
+    callbackUri = redirectUri(request, env);
+  } catch (error) {
+    return json({ error: error.message }, 500);
+  }
+
   const stateCookie = readCookie(request, STATE_COOKIE);
   const state = await verifyPayload(stateCookie, env.SESSION_SECRET, "oidc_state");
   if (!state || !url.searchParams.get("state") || url.searchParams.get("state") !== state.state) {
@@ -46,7 +54,7 @@ export async function onRequestGet({ request, env }) {
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: env.AUTHENTIK_REDIRECT_URI,
+        redirect_uri: callbackUri,
         code_verifier: state.verifier
       })
     });
