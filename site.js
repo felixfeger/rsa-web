@@ -83,6 +83,60 @@ const officialWebsites = {
 
 const automaticOfficialDomains = ["citymetro.xyz", "republicstates.xyz"];
 
+function setupMobileNavigation() {
+  document.querySelectorAll(".nav").forEach((nav, index) => {
+    const links = nav.querySelector(".wrap");
+    if (!links) return;
+
+    if (!links.id) links.id = "primary-navigation-" + (index + 1);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "mobile-menu-toggle";
+    button.setAttribute("aria-controls", links.id);
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-label", "Open primary navigation");
+
+    const label = document.createElement("span");
+    label.className = "mobile-menu-label";
+    label.textContent = "Menu";
+
+    const icon = document.createElement("span");
+    icon.className = "hamburger-icon";
+    icon.setAttribute("aria-hidden", "true");
+    for (let bar = 0; bar < 3; bar += 1) icon.appendChild(document.createElement("span"));
+
+    button.append(label, icon);
+    nav.insertBefore(button, links);
+    nav.classList.add("is-collapsible");
+
+    function closeMenu() {
+      nav.classList.remove("is-open");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", "Open primary navigation");
+      label.textContent = "Menu";
+    }
+
+    button.addEventListener("click", () => {
+      const open = !nav.classList.contains("is-open");
+      nav.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute("aria-label", open ? "Close primary navigation" : "Open primary navigation");
+      label.textContent = open ? "Close" : "Menu";
+    });
+
+    links.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeMenu();
+    });
+
+    nav.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && nav.classList.contains("is-open")) {
+        closeMenu();
+        button.focus();
+      }
+    });
+  });
+}
+
 function setupBanner() {
   const banner = document.querySelector(".official-banner");
   const button = document.querySelector(".banner-button");
@@ -325,6 +379,7 @@ function setupEmergencyPage() {
   `).join("");
 }
 
+setupMobileNavigation();
 setupBanner();
 setupSearch();
 setupContactForm();
