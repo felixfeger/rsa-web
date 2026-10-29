@@ -97,7 +97,7 @@ function setupMobileNavigation() {
     button.setAttribute("aria-label", "Open primary navigation");
 
     const label = document.createElement("span");
-    label.className = "mobile-menu-label";
+    label.className = "sr-only";
     label.textContent = "Menu";
 
     const icon = document.createElement("span");
@@ -121,7 +121,7 @@ function setupMobileNavigation() {
       nav.classList.toggle("is-open", open);
       button.setAttribute("aria-expanded", String(open));
       button.setAttribute("aria-label", open ? "Close primary navigation" : "Open primary navigation");
-      label.textContent = open ? "Close" : "Menu";
+      label.textContent = open ? "Close menu" : "Menu";
     });
 
     links.addEventListener("click", (event) => {
