@@ -25,6 +25,15 @@ export function clearCookie(name) {
   return name + "=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax";
 }
 
+export function redirect(location, cookies) {
+  const headers = new Headers({
+    "Location": location,
+    "Cache-Control": "no-store"
+  });
+  for (const value of cookies || []) headers.append("Set-Cookie", value);
+  return new Response(null, { status: 302, headers });
+}
+
 export function readCookie(request, name) {
   const cookies = request.headers.get("Cookie") || "";
   for (const part of cookies.split(";")) {
@@ -106,6 +115,7 @@ export function configError(env) {
   const required = ["AUTHENTIK_ISSUER", "AUTHENTIK_CLIENT_ID", "AUTHENTIK_CLIENT_SECRET", "AUTHENTIK_REDIRECT_URI", "SESSION_SECRET"];
   const missing = required.filter((key) => !env[key]);
   if (missing.length) return "Missing Pages configuration: " + missing.join(", ");
+  if (String(env.SESSION_SECRET).length < 32) return "SESSION_SECRET must contain at least 32 characters."; 
   try {
     if (new URL(env.AUTHENTIK_ISSUER).protocol !== "https:") return "AUTHENTIK_ISSUER must use HTTPS.";
     if (new URL(env.AUTHENTIK_REDIRECT_URI).protocol !== "https:") return "AUTHENTIK_REDIRECT_URI must use HTTPS.";
@@ -139,8 +149,10 @@ export function validJwtClaims(claims, config, nonce) {
   if (String(claims.iss || "").replace(/\/+$/, "") !== config.issuer.replace(/\/+$/, "")) return false;
   if (!audiences.includes(config.clientId)) return false;
   if (audiences.length > 1 && claims.azp !== config.clientId) return false;
+  if (claims.azp && claims.azp !== config.clientId) return false;
   if (!claims.sub || !Number.isFinite(claims.exp) || claims.exp <= now - 60) return false;
   if (claims.iat && claims.iat > now + 60) return false;
+  if (claims.nbf && claims.nbf > now + 60) return false;
   if (claims.nonce !== nonce) return false;
   return true;
 }
