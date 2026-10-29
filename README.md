@@ -19,15 +19,15 @@ Static multi-page website for the fictional Republic States of America governmen
 
 ## Contact and application backend
 
-`worker.js` sends contact messages and application survey responses through Resend to `hello@felixfeger.com`. Application forms collect a name, email address, and the listed survey answers only. The Worker accepts an allowlist of survey fields and does not keep an OTP store.
+The Pages Functions in `functions/api/contact.js` and `functions/api/application.js` handle form submissions on the same site at `/api/contact` and `/api/application`. They send contact messages and allowlisted application survey responses through Resend to `hello@felixfeger.com`. Application forms collect a name, email address, and survey answers only.
 
-The application pages link to the hosted Autentik sign-in page at `https://login.republicstates.xyz`. This is a hosted sign-in link; a complete OIDC callback/session flow requires an Autentik OAuth2/OIDC application and its client ID and redirect URI.
-
-Required Worker secret:
+Set the following Cloudflare Pages project secret:
 
 - `RESEND_API_KEY`
 
-The contact page and application pages call `https://workername.felixfeger46.workers.dev`.
+Optionally set `MAIL_FROM` to a sender address verified in Resend. If omitted, the functions use the configured default sender. Set variables/secrets for both Production and Preview if you use both.
+
+The application pages link to hosted Autentik sign-in at `https://login.republicstates.xyz`. The link does not establish an OIDC callback or gate form submissions; a full login session needs an Autentik OAuth2/OIDC application and client configuration.
 
 ## Emergency page
 
