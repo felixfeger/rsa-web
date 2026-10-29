@@ -112,17 +112,36 @@ export function issuerUrl(env) {
 }
 
 export function configError(env) {
-  const required = ["AUTHENTIK_ISSUER", "AUTHENTIK_CLIENT_ID", "AUTHENTIK_CLIENT_SECRET", "AUTHENTIK_REDIRECT_URI", "SESSION_SECRET"];
+  const required = ["AUTHENTIK_ISSUER", "AUTHENTIK_CLIENT_ID", "AUTHENTIK_CLIENT_SECRET", "SESSION_SECRET"];
   const missing = required.filter((key) => !env[key]);
   if (missing.length) return "Missing Pages configuration: " + missing.join(", ");
   if (String(env.SESSION_SECRET).length < 32) return "SESSION_SECRET must contain at least 32 characters."; 
   try {
     if (new URL(env.AUTHENTIK_ISSUER).protocol !== "https:") return "AUTHENTIK_ISSUER must use HTTPS.";
-    if (new URL(env.AUTHENTIK_REDIRECT_URI).protocol !== "https:") return "AUTHENTIK_REDIRECT_URI must use HTTPS.";
   } catch {
     return "AUTHENTIK_ISSUER or AUTHENTIK_REDIRECT_URI is not a valid URL.";
   }
   return "";
+}
+
+export function redirectUri(request, env) {
+  const requestUrl = new URL(request.url);
+  const configured = String(env.AUTHENTIK_REDIRECT_URI || "").trim();
+  const callback = configured || new URL("/auth/callback", requestUrl.origin).toString();
+  let target;
+  try {
+    target = new URL(callback);
+  } catch {
+    throw new Error("AUTHENTIK_REDIRECT_URI must be a valid HTTPS URL.");
+  }
+  if (target.protocol !== "https:") throw new Error("AUTHENTIK_REDIRECT_URI must use HTTPS.");
+  if (target.origin !== requestUrl.origin) {
+    throw new Error("AUTHENTIK_REDIRECT_URI must use the same hostname as the site.");
+  }
+  if (target.pathname !== "/auth/callback" || target.search || target.hash) {
+    throw new Error("AUTHENTIK_REDIRECT_URI must end with /auth/callback and have no query or fragment.");
+  }
+  return target.toString();
 }
 
 export async function discovery(env) {
