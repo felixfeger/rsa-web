@@ -169,6 +169,54 @@ function setupContactForm() {
   });
 }
 
+function setupApplicationAuth() {
+  document.querySelectorAll("[data-application-page]").forEach(async (page) => {
+    const form = page.querySelector("[data-application-form]");
+    const status = page.querySelector("[data-application-status]");
+    const signIn = page.querySelector("[data-auth-signin]");
+    const signOut = page.querySelector("[data-auth-signout]");
+    if (!form || !status || !signIn) return;
+
+    const returnTo = window.location.pathname;
+    signIn.href = "/auth/login?return_to=" + encodeURIComponent(returnTo);
+    form.hidden = true;
+    signOut.hidden = true;
+
+    try {
+      const response = await fetch("/auth/me", { credentials: "same-origin", cache: "no-store" });
+      if (!response.ok) {
+        status.textContent = new URLSearchParams(window.location.search).has("auth_error")
+          ? "Sign-in did not complete. Please try again."
+          : "Sign in with Autentik to complete this survey.";
+        return;
+      }
+
+      const result = await response.json();
+      if (!result.authenticated || !result.user) {
+        status.textContent = "Sign in with Autentik to complete this survey.";
+        return;
+      }
+
+      const nameInput = form.elements.namedItem("name");
+      const emailInput = form.elements.namedItem("email");
+      if (nameInput && result.user.name) {
+        nameInput.value = result.user.name;
+        nameInput.readOnly = true;
+      }
+      if (emailInput && result.user.email) {
+        emailInput.value = result.user.email;
+        emailInput.readOnly = true;
+      }
+      status.textContent = "Signed in as " + (result.user.name || result.user.email) + ".";
+      signIn.hidden = true;
+      signOut.hidden = false;
+      form.hidden = false;
+    } catch {
+      status.textContent = "Could not check your sign-in session. Reload the page and try again.";
+    }
+  });
+}
+
 function setupApplicationForms() {
   document.querySelectorAll("[data-application-form]").forEach((form) => {
     const page = form.closest("[data-application-page]");
@@ -280,6 +328,7 @@ function setupEmergencyPage() {
 setupBanner();
 setupSearch();
 setupContactForm();
+setupApplicationAuth();
 setupApplicationForms();
 setupOfficialChecker();
 setupEmergencyPage();
