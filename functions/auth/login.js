@@ -1,4 +1,5 @@
 import {
+  base64url,
   configError,
   cookie,
   discovery,
@@ -26,7 +27,7 @@ export async function onRequestGet({ request, env }) {
       scope: "openid email profile",
       state,
       nonce,
-      code_challenge: (await import("../_lib/auth.js")).base64url(challenge),
+      code_challenge: base64url(challenge),
       code_challenge_method: "S256"
     });
     const returnTo = safeReturnTo(url.searchParams.get("return_to") || "/");
