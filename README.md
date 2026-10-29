@@ -29,11 +29,11 @@ Optionally set `MAIL_FROM` to a sender address verified in Resend. If omitted, t
 
 The application pages use an Autentik OIDC authorization-code flow with PKCE. Pages Functions validate the ID token signature, issuer, audience, nonce, and state, then issue a signed HTTP-only session cookie. Application submissions require a valid session and use the authenticated profile's name and email. Autentik login credentials are never handled by this site.
 
-Configure the following Cloudflare Pages project values for both Production and Preview (with matching redirect URIs):
+Configure the following Cloudflare Pages project values for both Production and Preview. Register the exact callback URL in Authentik for each hostname:
 
 - `AUTHENTIK_ISSUER` (for example, `https://login.republicstates.xyz/application/o/rsa-web/`)
 - `AUTHENTIK_CLIENT_ID`
-- `AUTHENTIK_REDIRECT_URI` (for example, `https://YOUR-SITE-DOMAIN/auth/callback`)
+- `AUTHENTIK_REDIRECT_URI` (optional; if omitted, Pages uses the current HTTPS hostname plus `/auth/callback`)
 - `AUTHENTIK_CLIENT_SECRET` as an encrypted secret using the provider's `client_secret_basic` method
 - `SESSION_SECRET` as an encrypted, random secret of at least 32 bytes
 - `RESEND_API_KEY` as an encrypted secret
