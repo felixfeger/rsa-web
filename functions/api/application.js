@@ -1,3 +1,5 @@
+import { getSession, json } from "../_lib/auth.js";
+
 const RECIPIENT = "hello@felixfeger.com";
 const APPLICATION_FIELDS = {
   "Citizenship Application": ["citizenshipStatement", "additionalComments"],
@@ -9,10 +11,13 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
   if (!body) return json({ error: "Invalid request body." }, 400);
 
+  const session = await getSession(request, env);
+  if (!session || !session.user) return json({ error: "Please sign in with Autentik before submitting." }, 401);
+
   const applicationType = clean(body.applicationType, 80);
   const allowedFields = APPLICATION_FIELDS[applicationType];
-  const name = clean(body.name, 120);
-  const email = clean(body.email, 254);
+  const name = clean(session.user.name, 120);
+  const email = clean(session.user.email, 254);
   if (!allowedFields || !name || !validEmail(email)) {
     return json({ error: "Application type, name, and valid email are required." }, 400);
   }
