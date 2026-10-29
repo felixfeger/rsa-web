@@ -5,6 +5,7 @@ import {
   discovery,
   json,
   randomToken,
+  redirect,
   safeReturnTo,
   signPayload
 } from "../_lib/auth.js";
@@ -39,10 +40,7 @@ export async function onRequestGet({ request, env }) {
       returnTo,
       exp: Math.floor(Date.now() / 1000) + 600
     }, env.SESSION_SECRET);
-    const response = Response.redirect(metadata.authorization_endpoint + "?" + params.toString(), 302);
-    response.headers.append("Set-Cookie", cookie("__Host-rsa_oidc_state", stateCookie, 600));
-    response.headers.set("Cache-Control", "no-store");
-    return response;
+    return redirect(metadata.authorization_endpoint + "?" + params.toString(), [cookie("__Host-rsa_oidc_state", stateCookie, 600)]);
   } catch (error) {
     return json({ error: error.message || "Could not start Autentik sign-in." }, 502);
   }
