@@ -8,6 +8,7 @@ import {
   discovery,
   json,
   readCookie,
+  redirect,
   safeReturnTo,
   signPayload,
   verifyIdToken,
@@ -28,6 +29,7 @@ export async function onRequestGet({ request, env }) {
   }
 
   if (url.searchParams.get("error")) {
+    console.error("Autentik callback failed:", error.message || "unknown error");
     return redirectWithState(state.returnTo, url.origin);
   }
 
@@ -90,11 +92,10 @@ export async function onRequestGet({ request, env }) {
       iat: now,
       exp: now + 4 * 60 * 60
     }, env.SESSION_SECRET);
-    const response = Response.redirect(new URL(safeReturnTo(state.returnTo), url.origin).toString(), 302);
-    response.headers.append("Set-Cookie", cookie(SESSION_COOKIE, session, 4 * 60 * 60));
-    response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
-    response.headers.set("Cache-Control", "no-store");
-    return response;
+    return redirect(new URL(safeReturnTo(state.returnTo), url.origin).toString(), [
+      cookie(SESSION_COOKIE, session, 4 * 60 * 60),
+      clearCookie(STATE_COOKIE)
+    ]);
   } catch (error) {
     return redirectWithState(state.returnTo, url.origin);
   }
@@ -103,10 +104,7 @@ export async function onRequestGet({ request, env }) {
 function redirectWithState(path, origin) {
   const target = new URL(safeReturnTo(path), origin);
   target.searchParams.set("auth_error", "1");
-  const response = Response.redirect(target.toString(), 302);
-  response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
-  response.headers.set("Cache-Control", "no-store");
-  return response;
+  return redirect(target.toString(), [clearCookie(STATE_COOKIE)]);
 }
 
 function failureResponse(path, origin) {
