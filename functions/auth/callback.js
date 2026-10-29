@@ -24,15 +24,15 @@ export async function onRequestGet({ request, env }) {
   const stateCookie = readCookie(request, STATE_COOKIE);
   const state = await verifyPayload(stateCookie, env.SESSION_SECRET, "oidc_state");
   if (!state || !url.searchParams.get("state") || url.searchParams.get("state") !== state.state) {
-    return failureResponse("/", "Sign-in could not be verified. Please try again.");
+    return failureResponse("/", url.origin);
   }
 
   if (url.searchParams.get("error")) {
-    return redirectWithState(state.returnTo, "Sign-in was not completed.");
+    return redirectWithState(state.returnTo, url.origin);
   }
 
   const code = url.searchParams.get("code");
-  if (!code) return redirectWithState(state.returnTo, "Autentik did not return an authorization code.");
+  if (!code) return redirectWithState(state.returnTo, url.origin);
 
   try {
     const metadata = await discovery(env);
@@ -81,6 +81,8 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
+    if (!user.name || !user.email) throw new Error("Autentik must return name and email claims. Check the profile and email scope mappings.");
+
     const now = Math.floor(Date.now() / 1000);
     const session = await signPayload({
       purpose: "app_session",
@@ -94,21 +96,24 @@ export async function onRequestGet({ request, env }) {
     response.headers.set("Cache-Control", "no-store");
     return response;
   } catch (error) {
-    return redirectWithState(state.returnTo, error.message || "Sign-in failed.");
+    return redirectWithState(state.returnTo, url.origin);
   }
 }
 
-function redirectWithState(path, message) {
-  const target = new URL(safeReturnTo(path), "https://placeholder.invalid");
+function redirectWithState(path, origin) {
+  const target = new URL(safeReturnTo(path), origin);
   target.searchParams.set("auth_error", "1");
-  const response = Response.redirect(target.pathname + target.search, 302);
+  const response = Response.redirect(target.toString(), 302);
   response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
   response.headers.set("Cache-Control", "no-store");
   return response;
 }
 
-function failureResponse(path, message) {
-  const target = new URL(safeReturnTo(path), "https://placeholder.invalid");
+function failureResponse(path, origin) {
+  const target = new URL(safeReturnTo(path), origin);
   target.searchParams.set("auth_error", "1");
-  return Response.redirect(target.pathname + target.search, 302);
+  const response = Response.redirect(target.toString(), 302);
+  response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
