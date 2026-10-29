@@ -6,6 +6,7 @@ import {
   json,
   randomToken,
   redirect,
+  redirectUri,
   safeReturnTo,
   signPayload
 } from "../_lib/auth.js";
@@ -21,10 +22,11 @@ export async function onRequestGet({ request, env }) {
     const nonce = randomToken(32);
     const verifier = randomToken(48);
     const challenge = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+    const callbackUri = redirectUri(request, env);
     const params = new URLSearchParams({
       response_type: "code",
       client_id: env.AUTHENTIK_CLIENT_ID,
-      redirect_uri: env.AUTHENTIK_REDIRECT_URI,
+      redirect_uri: callbackUri,
       scope: "openid email profile",
       state,
       nonce,
