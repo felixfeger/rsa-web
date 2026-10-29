@@ -1,0 +1,114 @@
+import {
+  STATE_COOKIE,
+  SESSION_COOKIE,
+  clearCookie,
+  configError,
+  cookie,
+  decodeBase64url,
+  discovery,
+  json,
+  readCookie,
+  safeReturnTo,
+  signPayload,
+  verifyIdToken,
+  verifyPayload
+} from "../_lib/auth.js";
+
+const encoder = new TextEncoder();
+
+export async function onRequestGet({ request, env }) {
+  const error = configError(env);
+  if (error) return json({ error }, 500);
+
+  const url = new URL(request.url);
+  const stateCookie = readCookie(request, STATE_COOKIE);
+  const state = await verifyPayload(stateCookie, env.SESSION_SECRET, "oidc_state");
+  if (!state || !url.searchParams.get("state") || url.searchParams.get("state") !== state.state) {
+    return failureResponse("/", "Sign-in could not be verified. Please try again.");
+  }
+
+  if (url.searchParams.get("error")) {
+    return redirectWithState(state.returnTo, "Sign-in was not completed.");
+  }
+
+  const code = url.searchParams.get("code");
+  if (!code) return redirectWithState(state.returnTo, "Autentik did not return an authorization code.");
+
+  try {
+    const metadata = await discovery(env);
+    const credentials = btoa(String.fromCharCode(...encoder.encode(env.AUTHENTIK_CLIENT_ID + ":" + env.AUTHENTIK_CLIENT_SECRET)));
+    const tokenResponse = await fetch(metadata.token_endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + credentials,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json"
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: env.AUTHENTIK_REDIRECT_URI,
+        code_verifier: state.verifier
+      })
+    });
+    const tokens = await tokenResponse.json().catch(() => ({}));
+    if (!tokenResponse.ok || !tokens.id_token) {
+      throw new Error("Autentik could not exchange the authorization code. Check the client authentication method and redirect URI.");
+    }
+
+    const config = { issuer: env.AUTHENTIK_ISSUER, clientId: env.AUTHENTIK_CLIENT_ID };
+    const claims = await verifyIdToken(tokens.id_token, metadata, config, state.nonce);
+    let user = {
+      sub: String(claims.sub),
+      name: String(claims.name || claims.preferred_username || ""),
+      email: String(claims.email || ""),
+      preferred_username: String(claims.preferred_username || "")
+    };
+
+    if (tokens.access_token && metadata.userinfo_endpoint) {
+      const userInfoResponse = await fetch(metadata.userinfo_endpoint, {
+        headers: { "Authorization": "Bearer " + tokens.access_token, "Accept": "application/json" }
+      });
+      if (userInfoResponse.ok) {
+        const profile = await userInfoResponse.json();
+        if (profile.sub !== claims.sub) throw new Error("Autentik user information subject did not match the ID token.");
+        user = {
+          sub: String(profile.sub),
+          name: String(profile.name || profile.preferred_username || user.name),
+          email: String(profile.email || user.email),
+          preferred_username: String(profile.preferred_username || user.preferred_username)
+        };
+      }
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const session = await signPayload({
+      purpose: "app_session",
+      user,
+      iat: now,
+      exp: now + 4 * 60 * 60
+    }, env.SESSION_SECRET);
+    const response = Response.redirect(new URL(safeReturnTo(state.returnTo), url.origin).toString(), 302);
+    response.headers.append("Set-Cookie", cookie(SESSION_COOKIE, session, 4 * 60 * 60));
+    response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  } catch (error) {
+    return redirectWithState(state.returnTo, error.message || "Sign-in failed.");
+  }
+}
+
+function redirectWithState(path, message) {
+  const target = new URL(safeReturnTo(path), "https://placeholder.invalid");
+  target.searchParams.set("auth_error", "1");
+  const response = Response.redirect(target.pathname + target.search, 302);
+  response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
+
+function failureResponse(path, message) {
+  const target = new URL(safeReturnTo(path), "https://placeholder.invalid");
+  target.searchParams.set("auth_error", "1");
+  return Response.redirect(target.pathname + target.search, 302);
+}
