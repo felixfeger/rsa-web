@@ -135,7 +135,7 @@ export async function discovery(env) {
   if (!metadata.issuer || metadata.issuer.replace(/\/+$/, "") !== issuer) {
     throw new Error("Autentik discovery issuer does not match AUTHENTIK_ISSUER.");
   }
-  for (const key of ["authorization_endpoint", "token_endpoint", "jwks_uri"]) {
+  for (const key of ["authorization_endpoint", "token_endpoint", "jwks_uri", "userinfo_endpoint"]) {
     if (!metadata[key] || new URL(metadata[key]).protocol !== "https:") {
       throw new Error("Autentik discovery document is missing a valid " + key + ".");
     }
@@ -163,8 +163,6 @@ export async function verifyIdToken(idToken, metadata, config, nonce) {
   const header = JSON.parse(new TextDecoder().decode(decodeBase64url(parts[0])));
   const claims = JSON.parse(new TextDecoder().decode(decodeBase64url(parts[1])));
   if (header.alg !== "RS256" || !header.kid) throw new Error("Configure the Autentik provider to sign ID tokens with RS256.");
-  if (!validJwtClaims(claims, config, nonce)) throw new Error("Autentik ID token validation failed.");
-
   const jwksResponse = await fetch(metadata.jwks_uri, { headers: { "Accept": "application/json" } });
   if (!jwksResponse.ok) throw new Error("Could not load Autentik signing keys.");
   const jwks = await jwksResponse.json();
@@ -184,5 +182,6 @@ export async function verifyIdToken(idToken, metadata, config, nonce) {
     encoder.encode(parts[0] + "." + parts[1])
   );
   if (!valid) throw new Error("Autentik ID token signature is invalid.");
+  if (!validJwtClaims(claims, config, nonce)) throw new Error("Autentik ID token validation failed.");
   return claims;
 }
