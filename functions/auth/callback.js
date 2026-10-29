@@ -28,10 +28,7 @@ export async function onRequestGet({ request, env }) {
     return failureResponse("/", url.origin);
   }
 
-  if (url.searchParams.get("error")) {
-    console.error("Autentik callback failed:", error.message || "unknown error");
-    return redirectWithState(state.returnTo, url.origin);
-  }
+  if (url.searchParams.get("error")) return redirectWithState(state.returnTo, url.origin);
 
   const code = url.searchParams.get("code");
   if (!code) return redirectWithState(state.returnTo, url.origin);
@@ -110,8 +107,5 @@ function redirectWithState(path, origin) {
 function failureResponse(path, origin) {
   const target = new URL(safeReturnTo(path), origin);
   target.searchParams.set("auth_error", "1");
-  const response = Response.redirect(target.toString(), 302);
-  response.headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
-  response.headers.set("Cache-Control", "no-store");
-  return response;
+  return redirect(target.toString(), [clearCookie(STATE_COOKIE)]);
 }
