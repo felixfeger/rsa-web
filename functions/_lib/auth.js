@@ -2,7 +2,7 @@ export const SESSION_COOKIE = "__Host-rsa_session";
 export const STATE_COOKIE = "__Host-rsa_oidc_state";
 
 const encoder = new TextEncoder();
-const safeReturnPaths = new Set(["/", "/citizenship.html", "/greencard.html", "/passport.html"]);
+const safeReturnPaths = new Set(["/", "/citizenship", "/citizenship.html", "/greencard", "/greencard.html", "/passport", "/passport.html"]);
 
 export function json(value, status) {
   return new Response(JSON.stringify(value), {
