@@ -145,20 +145,15 @@ function setupContactForm() {
 
   const status = form.querySelector(".form-status");
   const submitButton = form.querySelector("[data-submit-contact]");
-  const workerUrl = form.dataset.workerUrl || "";
+  
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(form).entries());
-    if (!workerUrl) {
-      status.textContent = "Contact backend URL is missing.";
-      return;
-    }
-
-    submitButton.disabled = true;
+        submitButton.disabled = true;
     status.textContent = "Sending message...";
     try {
-      const response = await fetch(`${workerUrl}/contact`, {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -177,24 +172,19 @@ function setupContactForm() {
 function setupApplicationForms() {
   document.querySelectorAll("[data-application-form]").forEach((form) => {
     const page = form.closest("[data-application-page]");
-    const workerUrl = page?.dataset.workerUrl || "";
+    
     const type = page?.dataset.applicationType || "Application";
     const status = page?.querySelector("[data-application-status]");
     const submitButton = form.querySelector("button[type='submit']");
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!workerUrl) {
-        status.textContent = "Application backend URL is missing.";
-        return;
-      }
-
-      const payload = Object.fromEntries(new FormData(form).entries());
+            const payload = Object.fromEntries(new FormData(form).entries());
       payload.applicationType = type;
       submitButton.disabled = true;
       status.textContent = "Sending your response...";
       try {
-        const response = await fetch(`${workerUrl}/application`, {
+        const response = await fetch("/api/application", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
