@@ -72,10 +72,3 @@ function label(value) {
     .replace(/[-_]/g, " ")
     .replace(/^./, (char) => char.toUpperCase());
 }
-
-function json(value, status = 200) {
-  return new Response(JSON.stringify(value), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8" }
-  });
-}
