@@ -94,6 +94,7 @@ export async function onRequestGet({ request, env }) {
       clearCookie(STATE_COOKIE)
     ]);
   } catch (error) {
+    console.error("Autentik callback failed:", error.message || "unknown error");
     return redirectWithState(state.returnTo, url.origin);
   }
 }
