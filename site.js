@@ -175,86 +175,34 @@ function setupContactForm() {
 }
 
 function setupApplicationForms() {
-  document.querySelectorAll("[data-application-page]").forEach((page) => {
-    const workerUrl = page.dataset.workerUrl || "";
-    const type = page.dataset.applicationType || "Application";
-    const emailInput = page.querySelector("[data-otp-email]");
-    const otpInput = page.querySelector("[data-otp-code]");
-    const requestButton = page.querySelector("[data-request-application-otp]");
-    const verifyButton = page.querySelector("[data-verify-application-otp]");
-    const applicationForm = page.querySelector("[data-application-form]");
-    const status = page.querySelector("[data-application-status]");
-    const emailHidden = page.querySelector("[data-application-email]");
-    const otpHidden = page.querySelector("[data-application-otp]");
+  document.querySelectorAll("[data-application-form]").forEach((form) => {
+    const page = form.closest("[data-application-page]");
+    const workerUrl = page?.dataset.workerUrl || "";
+    const type = page?.dataset.applicationType || "Application";
+    const status = page?.querySelector("[data-application-status]");
+    const submitButton = form.querySelector("button[type='submit']");
 
-    requestButton?.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
-      if (!email) {
-        status.textContent = "Enter your email address first.";
-        return;
-      }
-      requestButton.disabled = true;
-      status.textContent = "Sending OTP code...";
-      try {
-        const response = await fetch(`${workerUrl}/request-otp`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        if (!response.ok) throw new Error("Could not send the OTP code.");
-        status.textContent = "Check your email for a six-digit code.";
-      } catch (error) {
-        status.textContent = error.message;
-      } finally {
-        requestButton.disabled = false;
-      }
-    });
-
-    verifyButton?.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
-      const otp = otpInput.value.trim();
-      if (!email || !otp) {
-        status.textContent = "Enter your email and OTP code.";
-        return;
-      }
-      verifyButton.disabled = true;
-      status.textContent = "Verifying OTP code...";
-      try {
-        const response = await fetch(`${workerUrl}/verify-otp`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp })
-        });
-        if (!response.ok) throw new Error("Invalid or expired OTP code.");
-        emailHidden.value = email;
-        otpHidden.value = otp;
-        applicationForm.hidden = false;
-        status.textContent = `${type} unlocked. Complete the form below.`;
-      } catch (error) {
-        status.textContent = error.message;
-      } finally {
-        verifyButton.disabled = false;
-      }
-    });
-
-    applicationForm?.addEventListener("submit", async (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(applicationForm).entries());
+      if (!workerUrl) {
+        status.textContent = "Application backend URL is missing.";
+        return;
+      }
+
+      const payload = Object.fromEntries(new FormData(form).entries());
       payload.applicationType = type;
-      const submitButton = applicationForm.querySelector("button[type='submit']");
       submitButton.disabled = true;
-      status.textContent = "Sending application...";
+      status.textContent = "Sending your response...";
       try {
         const response = await fetch(`${workerUrl}/application`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        if (!response.ok) throw new Error("Application could not be sent.");
-        applicationForm.reset();
-        applicationForm.hidden = true;
-        otpInput.value = "";
-        status.textContent = "Application sent. Thank you.";
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Response could not be sent.");
+        form.reset();
+        status.textContent = "Your response was sent. Thank you.";
       } catch (error) {
         status.textContent = error.message;
       } finally {
