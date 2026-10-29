@@ -1,6 +1,6 @@
 window.rsaEmergencyData = {
-  noCurrentEmergencies: false,
-  lastUpdated: "2026-09-23 10:15 PDT",
+  noCurrentEmergencies: true,
+  lastUpdated: "2026-10-28 17:45 PDT",
   message: "There are no active Republic States Emergency Management incidents. Please check with local, county, and state officials for updates from the local, county, and state incidents.",
   emergencies: [
     {
