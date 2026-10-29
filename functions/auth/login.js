@@ -33,6 +33,7 @@ export async function onRequestGet({ request, env }) {
       code_challenge: base64url(challenge),
       code_challenge_method: "S256"
     });
+    if (url.searchParams.get("prompt") === "none") params.set("prompt", "none");
     const returnTo = safeReturnTo(url.searchParams.get("return_to") || "/");
     const stateCookie = await signPayload({
       purpose: "oidc_state",
