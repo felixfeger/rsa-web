@@ -65,3 +65,27 @@ input,textarea{border-radius:5px}
   .hero h1,.page-title h1{font-size:1.85rem}
   .quick-links{grid-template-columns:1fr}
 }
+
+
+/* Keep the mobile menu control in the site header beside the brand. */
+@media(max-width:780px){
+  .topbar>.mobile-menu-toggle{
+    display:flex;
+    flex:0 0 auto;
+    width:44px;
+    min-height:44px;
+    margin-left:auto;
+    padding:.5rem;
+    color:var(--blue-darker);
+  }
+  .nav.is-collapsible>.mobile-menu-toggle{display:none}
+  .application-session-status{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:.35rem;
+    margin:0 0 1rem;
+    color:var(--muted);
+    font-size:.95rem;
+  }
+}
