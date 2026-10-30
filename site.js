@@ -302,6 +302,22 @@ function setupApplicationForms() {
     const type = page?.dataset.applicationType || "Application";
     const status = page?.querySelector("[data-application-status]");
     const submitButton = form.querySelector("button[type='submit']");
+    const confirmation = document.createElement("section");
+    confirmation.className = "form-panel application-confirmation";
+    confirmation.hidden = true;
+    confirmation.setAttribute("aria-live", "polite");
+
+    const confirmationHeading = document.createElement("h2");
+    confirmationHeading.textContent = "Response submitted";
+    confirmationHeading.tabIndex = -1;
+    const confirmationMessage = document.createElement("p");
+    confirmationMessage.textContent = "Your response was sent successfully. Thank you.";
+    const returnLink = document.createElement("a");
+    returnLink.className = "button";
+    returnLink.href = "services.html";
+    returnLink.textContent = "Return to government services";
+    confirmation.append(confirmationHeading, confirmationMessage, returnLink);
+    form.insertAdjacentElement("afterend", confirmation);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -318,7 +334,10 @@ function setupApplicationForms() {
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || "Response could not be sent.");
         form.reset();
-        status.textContent = "Your response was sent. Thank you.";
+        form.hidden = true;
+        confirmation.hidden = false;
+        confirmationHeading.focus();
+        if (status) status.textContent = "Your response was sent successfully.";
       } catch (error) {
         status.textContent = error.message;
       } finally {
