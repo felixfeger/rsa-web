@@ -89,3 +89,15 @@ input,textarea{border-radius:5px}
     font-size:.95rem;
   }
 }
+
+
+.application-confirmation{
+  border-top:.4rem solid #16803c;
+  margin-top:1.25rem;
+}
+.application-confirmation h2{
+  margin-top:0;
+}
+.application-confirmation p{
+  margin:0 0 1rem;
+}
