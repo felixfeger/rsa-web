@@ -300,8 +300,13 @@ function setupApplicationForms() {
     const page = form.closest("[data-application-page]");
     
     const type = page?.dataset.applicationType || "Application";
-    const status = page?.querySelector("[data-application-status]");
     const submitButton = form.querySelector("button[type='submit']");
+    const responseStatus = document.createElement("p");
+    responseStatus.className = "form-status";
+    responseStatus.setAttribute("role", "status");
+    responseStatus.setAttribute("aria-live", "polite");
+    if (submitButton) submitButton.before(responseStatus);
+    else form.append(responseStatus);
     const confirmation = document.createElement("section");
     confirmation.className = "form-panel application-confirmation";
     confirmation.hidden = true;
@@ -324,7 +329,7 @@ function setupApplicationForms() {
             const payload = Object.fromEntries(new FormData(form).entries());
       payload.applicationType = type;
       submitButton.disabled = true;
-      status.textContent = "Sending your response...";
+      responseStatus.textContent = "Sending your response...";
       try {
         const response = await fetch("/api/application", {
           method: "POST",
@@ -337,9 +342,9 @@ function setupApplicationForms() {
         form.hidden = true;
         confirmation.hidden = false;
         confirmationHeading.focus();
-        if (status) status.textContent = "Your response was sent successfully.";
+        responseStatus.textContent = "";
       } catch (error) {
-        status.textContent = error.message;
+        responseStatus.textContent = error.message;
       } finally {
         submitButton.disabled = false;
       }
