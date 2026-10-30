@@ -106,7 +106,11 @@ function setupMobileNavigation() {
     for (let bar = 0; bar < 3; bar += 1) icon.appendChild(document.createElement("span"));
 
     button.append(label, icon);
-    nav.insertBefore(button, links);
+    const topbar = nav.parentElement?.querySelector(".topbar");
+    const brand = topbar?.querySelector(".brand");
+    if (brand) brand.insertAdjacentElement("afterend", button);
+    else if (topbar) topbar.appendChild(button);
+    else nav.insertBefore(button, links);
     nav.classList.add("is-collapsible");
 
     function closeMenu() {
@@ -274,8 +278,16 @@ function setupApplicationAuth() {
         emailInput.value = result.user.email;
         emailInput.readOnly = true;
       }
-      status.textContent = "Signed in as " + (result.user.name || result.user.email) + ".";
-      if (signOut) signOut.hidden = false;
+      const sessionStatus = document.createElement("p");
+      sessionStatus.className = "application-session-status";
+      sessionStatus.textContent = "Signed in as " + (result.user.name || result.user.email);
+      if (signOut) {
+        signOut.hidden = false;
+        sessionStatus.append(document.createTextNode(" · "), signOut);
+      }
+      form.prepend(sessionStatus);
+      const authPanel = status.closest(".form-panel");
+      if (authPanel) authPanel.hidden = true;
       form.hidden = false;
     } catch {
       status.textContent = "Could not check your sign-in session. Reload the page and try again.";
